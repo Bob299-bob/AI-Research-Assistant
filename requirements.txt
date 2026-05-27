@@ -1,0 +1,12 @@
+streamlit
+groq
+python-dotenv
+ddgs
+sentence-transformers
+numpy
+faiss-cpu
+pandas
+reportlab
+matplotlib
+torch
+transformers
