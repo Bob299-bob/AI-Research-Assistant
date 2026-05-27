@@ -7,12 +7,10 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 import faiss
 import random
+import streamlit as st
 #load env file
 load_dotenv()
-API_KEYS = [
-    os.getenv("GROQ_API_KEY_1"),
-    os.getenv("GROQ_API_KEY_2")
-]
+API_KEYS = st.secrets["GROQ_API_KEYS"]
 # remove None values
 API_KEYS = [key for key in API_KEYS if key]
 random.shuffle(API_KEYS)
