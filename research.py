@@ -6,23 +6,15 @@ from ddgs import DDGS
 from sentence_transformers import SentenceTransformer
 import numpy as np
 import faiss
-import random
-import streamlit as st
 #load env file
 load_dotenv()
-if "GROQ_API_KEYS" in st.secrets:
-    API_KEYS = st.secrets["GROQ_API_KEYS"]
-else:
-    API_KEYS = [
-        os.getenv("GROQ_API_KEY_1"),
-        os.getenv("GROQ_API_KEY_2")
-    ]
-random.shuffle(API_KEYS)
-
+#fetch API 
+client=Groq(api_key=os.getenv("GROQ_API_KEY")) 
 #Defining the embedding model which can break words into vectors 
 model=SentenceTransformer(
         "all-MiniLM-L6-v2"
     ) 
+#function for web search data through duckduckgo--search
 
 def search_web(topic):
     results = []
@@ -38,8 +30,10 @@ def search_web(topic):
                 results.append(
                     f"""
 TITLE: {result.get('title', '')}
+
 CONTENT:
 {result.get('body', '')}
+
 SOURCE:
 {result.get('href', '')}
 """
@@ -66,9 +60,7 @@ def retrieve(query,index,chunks):
 def report_generate(topic):
     web_data=search_web(topic)
     web_data = web_data[:7000]
-    for key in API_KEYS:
-        client = Groq(api_key=key)
-        prompt = f"""
+    prompt = f"""
 You are a world-class AI Research Analyst, Data Analyst, and Technical Writer.
 
 Your task is to generate a highly detailed, professional, analytical, and insightful research report STRICTLY using the provided research data.
@@ -245,19 +237,24 @@ FINAL RULES
 - Maintain professional research quality.
 - Produce deep, meaningful, and useful analysis.
 """
-        try:
-            response = client.chat.completions.create(model="llama-3.3-70b-versatile",temperature=0.3,max_tokens=4000,messages=[{'role':'user','content':prompt}])
-            result = response.choices[0].message.content
-            if result:
-                return result
-        except Exception as e:
-            print("key failed:",key[:10],e)
-            continue
-    return "All API keys exhausted"
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            temperature=0.3,
+            max_tokens=4000,
+            messages=[
+                {
+                    'role':'user',
+                    'content':prompt
+                }
+            ]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"Error generating report: {str(e)}"
 
 #A function for question answer round
-def question_answers(question, context):
-
+def question_answers(question,context):
     prompt = f"""
 You are an intelligent AI research assistant.
 
@@ -278,27 +275,16 @@ Instructions:
 - Use bullet points if useful
 - Do not hallucinate
 """
-
-    for key in API_KEYS:
-        try:
-
-            client = Groq(api_key=key)
-
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                temperature=0.3,
-                max_tokens=2000,
-                messages=[
-                    {
-                        'role': 'user',
-                        'content': prompt
-                    }
-                ]
-            )
-
-            return response.choices[0].message.content
-
-        except Exception as e:
-            print(f"Key failed: {e}")
-
-    return "All API keys exhausted"
+    #applying model
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        temperature=0.3,
+        max_tokens=4000,
+        messages=[
+            {
+                'role':'user',
+                'content':prompt
+            }
+        ]
+    )
+    return response.choices[0].message.content
