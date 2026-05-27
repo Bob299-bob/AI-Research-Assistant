@@ -2,11 +2,11 @@ streamlit
 groq
 python-dotenv
 ddgs
-sentence-transformers
+sentence-transformers==2.7.0
+transformers==4.41.2
+torch
 numpy
-faiss-cpu
+faiss-cpu==1.7.4
 pandas
 reportlab
 matplotlib
-torch
-transformers
