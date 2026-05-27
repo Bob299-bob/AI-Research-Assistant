@@ -64,8 +64,8 @@ def retrieve(query,index,chunks):
     return "\n\n".join(context)
 #Generate report in english
 def report_generate(topic):
-        web_data=search_web(topic)
-        web_data = web_data[:7000]
+    web_data=search_web(topic)
+    web_data = web_data[:7000]
     for key in API_KEYS:
         try:
             client = Groq(api_key=key)
@@ -263,8 +263,8 @@ FINAL RULES
                 print(f"Generation failed: {e}")
                 continue
         except Exception as e:
-            print(f"Key failed": e)
-                continue
+            print("Key failed": e)
+            continue
 
     return "All API keys exhausted"
 
