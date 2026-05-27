@@ -263,7 +263,7 @@ FINAL RULES
                 print(f"Generation failed: {e}")
                 continue
         except Exception as e:
-            print("Key failed": e)
+            print("Key failed", e)
             continue
 
     return "All API keys exhausted"
