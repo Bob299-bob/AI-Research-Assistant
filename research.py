@@ -239,7 +239,7 @@ FINAL RULES
 """
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="gemma2-9b-it",
             temperature=0.3,
             max_tokens=4000,
             messages=[
@@ -277,7 +277,7 @@ Instructions:
 """
     #applying model
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="gemma2-9b-it",
         temperature=0.3,
         max_tokens=4000,
         messages=[
