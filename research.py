@@ -251,7 +251,7 @@ FINAL RULES
             if result:
                 return result
         except Exception as e:
-            print("key failed:",key[:10],e")
+            print("key failed:",key[:10],e)
             continue
     return "All API keys exhausted"
 
