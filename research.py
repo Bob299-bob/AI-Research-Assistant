@@ -67,9 +67,8 @@ def report_generate(topic):
     web_data=search_web(topic)
     web_data = web_data[:7000]
     for key in API_KEYS:
-        try:
-            client = Groq(api_key=key)
-            prompt = f"""
+        client = Groq(api_key=key)
+        prompt = f"""
 You are a world-class AI Research Analyst, Data Analyst, and Technical Writer.
 
 Your task is to generate a highly detailed, professional, analytical, and insightful research report STRICTLY using the provided research data.
@@ -246,26 +245,14 @@ FINAL RULES
 - Maintain professional research quality.
 - Produce deep, meaningful, and useful analysis.
 """
-            try:
-                response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                temperature=0.3,
-                max_tokens=4000,
-                messages=[
-                    {
-                        'role':'user',
-                        'content':prompt
-                    }
-                ]
-                )
-                return response.choices[0].message.content
-            except Exception as e:
-                print(f"Generation failed: {e}")
-                continue
+        try:
+            response = client.chat.completions.create(model="llama-3.3-70b-versatile",temperature=0.3,max_tokens=4000,messages=[{'role':'user','content':prompt}])
+            result = response.choices[0].message.content
+            if result:
+                return result
         except Exception as e:
-            print("Key failed", e)
+            print("key failed:",key[:10],e")
             continue
-
     return "All API keys exhausted"
 
 #A function for question answer round
