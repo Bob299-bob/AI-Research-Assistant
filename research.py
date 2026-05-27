@@ -6,41 +6,38 @@ from ddgs import DDGS
 from sentence_transformers import SentenceTransformer
 import numpy as np
 import faiss
+import random
 #load env file
 load_dotenv()
-#fetch API 
-client=Groq(api_key=os.getenv("GROQ_API_KEY")) 
+API_KEYS = [
+    os.getenv("GROQ_API_KEY_1"),
+    os.getenv("GROQ_API_KEY_2")
+]
+# remove None values
+API_KEYS = [key for key in API_KEYS if key]
+random.shuffle(API_KEYS)
+
 #Defining the embedding model which can break words into vectors 
 model=SentenceTransformer(
         "all-MiniLM-L6-v2"
     ) 
-#function for web search data through duckduckgo--search
-
-from ddgs import DDGS
 
 def search_web(topic):
-
     results = []
-
     try:
         with DDGS() as ddgs:
-
             search_results = list(
                 ddgs.text(
                     f"{topic} statistics trends data report",
                     max_results=10
                 )
             )
-
             for result in search_results:
-
                 results.append(
                     f"""
 TITLE: {result.get('title', '')}
-
 CONTENT:
 {result.get('body', '')}
-
 SOURCE:
 {result.get('href', '')}
 """
@@ -65,9 +62,12 @@ def retrieve(query,index,chunks):
     return "\n\n".join(context)
 #Generate report in english
 def report_generate(topic):
-    web_data=search_web(topic)
-    web_data = web_data[:7000]
-    prompt = f"""
+    for key in API_KEYS:
+        try:
+            client = Groq(api_key=key)
+            web_data=search_web(topic)
+            web_data = web_data[:7000]
+            prompt = f"""
 You are a world-class AI Research Analyst, Data Analyst, and Technical Writer.
 
 Your task is to generate a highly detailed, professional, analytical, and insightful research report STRICTLY using the provided research data.
@@ -244,24 +244,30 @@ FINAL RULES
 - Maintain professional research quality.
 - Produce deep, meaningful, and useful analysis.
 """
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            temperature=0.3,
-            max_tokens=4000,
-            messages=[
-                {
-                    'role':'user',
-                    'content':prompt
-                }
-            ]
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        return f"Error generating report: {str(e)}"
+            try:
+                response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                temperature=0.3,
+                max_tokens=4000,
+                messages=[
+                    {
+                        'role':'user',
+                        'content':prompt
+                    }
+                ]
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                print(f"Generation failed: {e}")
+                continue
+        except Exception as e:
+            print(f"Key failed: {e}")
+
+    return "All API keys exhausted"
 
 #A function for question answer round
-def question_answers(question,context):
+def question_answers(question, context):
+
     prompt = f"""
 You are an intelligent AI research assistant.
 
@@ -282,16 +288,27 @@ Instructions:
 - Use bullet points if useful
 - Do not hallucinate
 """
-    #applying model
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        temperature=0.3,
-        max_tokens=4000,
-        messages=[
-            {
-                'role':'user',
-                'content':prompt
-            }
-        ]
-    )
-    return response.choices[0].message.content
+
+    for key in API_KEYS:
+        try:
+
+            client = Groq(api_key=key)
+
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                temperature=0.3,
+                max_tokens=2000,
+                messages=[
+                    {
+                        'role': 'user',
+                        'content': prompt
+                    }
+                ]
+            )
+
+            return response.choices[0].message.content
+
+        except Exception as e:
+            print(f"Key failed: {e}")
+
+    return "All API keys exhausted"
