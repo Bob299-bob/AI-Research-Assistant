@@ -10,9 +10,13 @@ import random
 import streamlit as st
 #load env file
 load_dotenv()
-API_KEYS = st.secrets["GROQ_API_KEYS"]
-# remove None values
-API_KEYS = [key for key in API_KEYS if key]
+if "GROQ_API_KEYS" in st.secrets:
+    API_KEYS = st.secrets["GROQ_API_KEYS"]
+else:
+    API_KEYS = [
+        os.getenv("GROQ_API_KEY_1"),
+        os.getenv("GROQ_API_KEY_2")
+    ]
 random.shuffle(API_KEYS)
 
 #Defining the embedding model which can break words into vectors 
@@ -60,11 +64,11 @@ def retrieve(query,index,chunks):
     return "\n\n".join(context)
 #Generate report in english
 def report_generate(topic):
+        web_data=search_web(topic)
+        web_data = web_data[:7000]
     for key in API_KEYS:
         try:
             client = Groq(api_key=key)
-            web_data=search_web(topic)
-            web_data = web_data[:7000]
             prompt = f"""
 You are a world-class AI Research Analyst, Data Analyst, and Technical Writer.
 
@@ -259,7 +263,8 @@ FINAL RULES
                 print(f"Generation failed: {e}")
                 continue
         except Exception as e:
-            print(f"Key failed: {e}")
+            print(f"Key failed": e)
+                continue
 
     return "All API keys exhausted"
 
