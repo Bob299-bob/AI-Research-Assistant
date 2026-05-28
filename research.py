@@ -6,6 +6,10 @@ from ddgs import DDGS
 from sentence_transformers import SentenceTransformer
 import numpy as np
 import faiss
+import streamlit as st
+@st.cache_data
+def cached_search(topic):
+    return search_web(topic)
 #load env file
 load_dotenv()
 #fetch API 
@@ -58,8 +62,8 @@ def retrieve(query,index,chunks):
     return "\n\n".join(context)
 #Generate report in english
 def report_generate(topic):
-    web_data=search_web(topic)
-    web_data = web_data[:7000]
+    web_data=cached_search(topic)
+    web_data = web_data[:3000]
     prompt = f"""
 You are a world-class AI Research Analyst, Data Analyst, and Technical Writer.
 
@@ -239,9 +243,9 @@ FINAL RULES
 """
     try:
         response = client.chat.completions.create(
-            model="gemma2-9b-it",
+            model="llama-3.1-8b-instant",
             temperature=0.3,
-            max_tokens=4000,
+            max_tokens=1200,
             messages=[
                 {
                     'role':'user',
@@ -277,9 +281,9 @@ Instructions:
 """
     #applying model
     response = client.chat.completions.create(
-        model="gemma2-9b-it",
+        model="llama-3.1-8b-instant",
         temperature=0.3,
-        max_tokens=4000,
+        max_tokens=500,
         messages=[
             {
                 'role':'user',
